@@ -1,0 +1,59 @@
+name: SDD - Sync Tasks to Issues
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'context/features/**/tasks.md'
+      - 'context/active_sprint.md'
+
+jobs:
+  generate-issues:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Parse Markdown and Create Issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Buscando por tarefas pendentes nos arquivos SDD..."
+          
+          # Arquivos para buscar tarefas
+          FILES=$(find context -name "tasks.md" -o -name "active_sprint.md")
+          
+          for file in $FILES; do
+            # Pega linhas que comecam com "- [ ] " ignorando espacos iniciais
+            grep -E "^[[:space:]]*\- \[ \]" "$file" | while read -r line ; do
+              
+              # Limpa a string da tarefa
+              TASK_TITLE=$(echo "$line" | sed 's/^[[:space:]]*\- \[ \] //')
+              
+              # Verifica se ja existe uma issue aberta com esse titulo
+              EXISTING_ISSUE=$(gh issue list --search "\"$TASK_TITLE\" in:title state:open" --json number -q '.[0].number')
+              
+              if [ -z "$EXISTING_ISSUE" ]; then
+                echo "Criando issue para: $TASK_TITLE"
+                
+                # Cria a Issue e atrela a origem (rastreabilidade)
+                gh issue create \
+                  --title "$TASK_TITLE" \
+                  --body "### Tarefa Gerada Automaticamente (SDD) 🤖
+                  
+                  Esta issue foi gerada a partir da especificação.
+                  **Origem:** [\`$file\`](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/$file)
+                  
+                  Por favor, feche esta issue apenas quando a funcionalidade atender a todos os requisitos do contrato." \
+                  --label "sdd-task, enhancement"
+                  
+              else
+                echo "Issue já existe para: $TASK_TITLE (Issue #$EXISTING_ISSUE). Ignorando."
+              fi
+            done
+          done
