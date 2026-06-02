@@ -1,12 +1,14 @@
-# Sprint Atual: Setup Inicial da Arquitetura Multi-Tenant
+# Sprint Atual: Implementação do Core (Catálogo e Estoque)
 
-**Objetivo:** Inicializar o projeto backend Django, configurar a conexão com o banco de dados PostgreSQL e instalar e configurar a biblioteca `django-tenants` para criar o schema `public` básico.
+**Objetivo:** Estabelecer a base funcional para os lojistas, permitindo o cadastro de produtos e controle de estoque com isolamento total via schemas.
 
-**Status:** Concluído.
+**Status:** Em progresso.
 
-## Tarefas Pendentes
-- [x] Inicializar ambiente virtual Python (venv).
-- [x] Criar o projeto Django em `src/backend/`.
-- [x] Instalar as dependências iniciais (`django`, `psycopg2-binary`, `django-tenants`).
-- [x] Configurar os bancos de dados em `settings.py`.
-- [x] Criar os apps iniciais para o schema public (`customers`).
+## Tarefas em Execução
+- [ ] Configurar Docker Compose e Banco de Dados.
+- [ ] Implementar App de Catálogo (Models e Migrations).
+- [ ] Criar API de Produtos.
+
+## Próximos Passos
+- Integração básica com o Frontend Next.js.
+- Testes de isolamento de schemas.

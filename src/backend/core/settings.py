@@ -1,14 +1,15 @@
 import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-j69r-kj17v!1rs7b#f^45f1uz&dqc#xa-g3z+5lhe!o$#$y_oo'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-j69r-kj17v!1rs7b#f^45f1uz&dqc#xa-g3z+5lhe!o$#$y_oo')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ['*']
 
@@ -25,6 +26,7 @@ SHARED_APPS = (
     'django.contrib.staticfiles',
     
     'rest_framework',
+    'corsheaders',
 )
 
 TENANT_APPS = (
@@ -38,6 +40,7 @@ TENANT_APPS = (
     'django.contrib.staticfiles',
     
     'rest_framework',
+    'catalog',
 )
 
 INSTALLED_APPS = list(SHARED_APPS) + [app for app in TENANT_APPS if app not in SHARED_APPS]
@@ -47,6 +50,7 @@ TENANT_DOMAIN_MODEL = "customers.Domain"
 
 MIDDLEWARE = [
     'django_tenants.middleware.main.TenantMainMiddleware', # Must be at the top
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -55,6 +59,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True # Ajustar em produção
+
 
 ROOT_URLCONF = 'core.urls'
 
@@ -79,11 +86,11 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django_tenants.postgresql_backend',
-        'NAME': 'markethub',
-        'USER': 'postgres',
-        'PASSWORD': 'password',  # Alterar no .env depois
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': config('POSTGRES_DB', default='markethub'),
+        'USER': config('POSTGRES_USER', default='postgres'),
+        'PASSWORD': config('POSTGRES_PASSWORD', default='password'),
+        'HOST': config('POSTGRES_HOST', default='localhost'),
+        'PORT': config('POSTGRES_PORT', default='5432'),
     }
 }
 
